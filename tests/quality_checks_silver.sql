@@ -63,3 +63,42 @@ SELECT TOP 1000 * FROM bronze.crm_prd_info
 
 --Check for Invalid Date Orders
 SELECT * FROM silver.crm_prd_info
+WHERE  prd_end_dt < prd_start_dt;
+-- =========================================
+-- Checking 'silver.crm_sales_details'
+-- =========================================
+--Check for invalid dates
+SELECT 
+NULLIF(sls_order_dt, 0) sls_order_dt
+FROM bronze.crm_sales_details
+WHERE sls_order_dt <= 0 or len(sls_order_dt) != 8;
+GO
+
+SELECT 
+NULLIF(sls_ship_dt, 0) sls_ship_dt
+FROM bronze.crm_sales_details
+WHERE sls_ship_dt <= 0 or len(sls_ship_dt) != 8;
+GO
+
+SELECT 
+NULLIF(sls_due_dt, 0) sls_due_dt
+FROM bronze.crm_sales_details
+WHERE sls_due_dt <= 0 or len(sls_due_dt) != 8;
+GO
+-- Check for Invalid date orders
+SELECT * FROM silver.crm_sales_details
+WHERE sls_order_dt > sls_ship_dt or sls_order_dt > sls_due_dt;
+GO
+
+-- Check Data Consistency: Sales, Quantity and Price
+-- values must not be NULL, zero or negative
+SELECT 
+sls_sales,
+sls_quantity,
+sls_price
+FROM silver.crm_sales_details
+WHERE Sls_sales != sls_quantity * sls_price
+OR sls_sales IS NULL OR sls_quantity IS NULL OR sls_price IS NULL
+OR sls_sales <=0 OR sls_quantity <=0 or sls_price <=0
+ORDER BY sls_quantity, sls_price;
+GO 

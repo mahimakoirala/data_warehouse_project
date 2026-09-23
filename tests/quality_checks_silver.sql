@@ -102,3 +102,29 @@ OR sls_sales IS NULL OR sls_quantity IS NULL OR sls_price IS NULL
 OR sls_sales <=0 OR sls_quantity <=0 or sls_price <=0
 ORDER BY sls_quantity, sls_price;
 GO 
+
+-- =========================================
+-- Checking 'silver.erp_cust_az12'
+-- =========================================
+	
+--Identify out-of-range birthdates
+SELECT DISTINCT bdate from bronze.erp_cust_az12 
+WHERE bdate < '1924-01-01' or bdate > GETDATE()
+
+--Data Standardization and Consistency
+SELECT DISTINCT 
+gen
+FROM bronze.erp_cust_az12 
+
+-- =========================================
+-- Checking 'silver.erp_px_cat_g1v2'
+-- =========================================
+
+--check for unwanted spaces
+SELECT * FROM bronze.erp_px_cat_g1v2
+WHERE TRIM(id) != id
+
+-- Data standardization & consistency
+SELECT DISTINCT subcat from bronze.erp_px_cat_g1v2;
+SELECT DISTINCT cat from bronze.erp_px_cat_g1v2;
+SELECT DISTINCT maintenance from bronze.erp_px_cat_g1v2;

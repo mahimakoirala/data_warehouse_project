@@ -151,7 +151,7 @@ BEGIN
 	        PRINT '>> Load Duration: ' + CAST(DATEDIFF(SECOND, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 	        PRINT '>> -------------';		
 
-			 --Loading silver.crm_sales_details
+			 --Loading silver.erp_cust_az12
 	        SET @start_time = GETDATE();
 			PRINT '>> Truncating Table: silver.erp_cust_az12';
 			TRUNCATE TABLE silver.erp_cust_az12;
@@ -173,14 +173,49 @@ BEGIN
 		        PRINT '>> Load Duration: ' + CAST(DATEDIFF(SECOND, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		        PRINT '>> -------------';
 
+				 --Loading silver.erp_loc_a101
+		        SET @start_time = GETDATE();
+				PRINT '>> Truncating Table: silver.erp_loc_a101';
+				TRUNCATE TABLE silver.erp_loc_a101;
+				PRINT '>> Inserting Data Into: silver.erp_loc_a101';
+				INSERT INTO silver.erp_loc_a101 (cid, cntry)
+				SELECT  
+				REPLACE(cid, '-', '') cid,
+				CASE WHEN TRIM(cntry) IN ('US', 'USA') then 'United States'
+					WHEN TRIM(cntry) is null OR TRIM(cntry) = '' then 'n/a'
+					WHEN TRIM(cntry) = ('DE') then 'Germany'
+					else cntry
+				END AS cntry
+				FROM [DataWarehouse].[bronze].[erp_loc_a101];
+				SET @end_time = GETDATE();
+		        PRINT '>> Load Duration: ' + CAST(DATEDIFF(SECOND, @start_time, @end_time) AS NVARCHAR) + ' seconds';
+		        PRINT '>> -------------';
+
+				 --Loading silver.erp_px_cat_g1v2
+		        SET @start_time = GETDATE();
+				PRINT '>> Truncating Table: silver.erp_px_cat_g1v2';
+				TRUNCATE TABLE silver.erp_px_cat_g1v2;
+				PRINT '>> Inserting Data Into: silver.erp_px_cat_g1v2';
+				INSERT INTO silver.erp_px_cat_g1v2 
+				(id, cat, subcat, maintenance)
+				SELECT 
+				id,
+				cat,
+				subcat,
+				maintenance
+				FROM bronze.erp_px_cat_g1v2;
+				SET @end_time = GETDATE();
+		        PRINT '>> Load Duration: ' + CAST(DATEDIFF(SECOND, @start_time, @end_time) AS NVARCHAR) + ' seconds';
+		        PRINT '>> -------------';
+
 
     END TRY
 	BEGIN CATCH
 		PRINT '=========================================='
 		PRINT 'ERROR OCCURED DURING LOADING BRONZE LAYER'
-		PRINT 'Error Message' + ERROR_MESSAGE();
-		PRINT 'Error Message' + CAST (ERROR_NUMBER() AS NVARCHAR);
-		PRINT 'Error Message' + CAST (ERROR_STATE() AS NVARCHAR);
+		PRINT 'Error Message ' + ERROR_MESSAGE();
+		PRINT 'Error Message ' + CAST (ERROR_NUMBER() AS NVARCHAR);
+		PRINT 'Error Message ' + CAST (ERROR_STATE() AS NVARCHAR);
 		PRINT '=========================================='
 	END CATCH
 END
